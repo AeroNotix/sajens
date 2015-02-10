@@ -6,9 +6,6 @@
 (definterface ICounter
   (update [^Number value] "Add a value to the count"))
 
-(definterface IExpirer
-  (expire [] "Tells an IExpirer to expire its elements"))
-
 (defn expire-entry [{:keys [time]} now period]
   (< (- now time) period))
 
@@ -19,15 +16,12 @@
      (if (get (.getCounters registry) name)
        (get (.getCounters registry) name)
        (let [counts (atom [])
-             spiral (proxy [Counter ICounter IExpirer] []
-                      (expire []
+             spiral (proxy [Counter ICounter] []
+                      (getCount []
                         (let [ts (System/currentTimeMillis)]
                           (swap! counts (fn [entries]
                                           (filter #(expire-entry % ts period)
-                                            entries)))
-                          nil))
-                      (getCount []
-                        (.expire this)
+                                            entries))))
                         (reduce + (map :value @counts)))
                       (update [value]
                         (let [ts (System/currentTimeMillis)]
