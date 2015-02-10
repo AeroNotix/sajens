@@ -3,6 +3,8 @@
 A Clojure library exposing additional metric types for the
 [clojure-metrics](https://github.com/sjl/metrics-clojure) library.
 
+![sajens](http://i.imgur.com/244rqfB.jpg)
+
 
 ## Usage
 
