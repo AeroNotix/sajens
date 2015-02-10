@@ -1,6 +1,6 @@
 (ns sajens.fikszyn
   (:require [metrics.core :as clj-metrics])
-  (:import [com.codahale.metrics Metric Counting]))
+  (:import [com.codahale.metrics Counting Counter]))
 
 
 (definterface ICounter
@@ -17,7 +17,7 @@
      (->Spiral name period clj-metrics/default-registry))
   ([name period registry]
      (let [counts (atom [])
-           spiral (proxy [Metric Counting ICounter IExpirer] []
+           spiral (proxy [Counter ICounter IExpirer] []
                     (expire []
                       (let [ts (System/currentTimeMillis)]
                         (swap! counts (fn [entries]
