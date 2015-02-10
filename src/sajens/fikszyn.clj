@@ -16,19 +16,21 @@
   ([name period]
      (->Spiral name period clj-metrics/default-registry))
   ([name period registry]
-     (let [counts (atom [])
-           spiral (proxy [Counter ICounter IExpirer] []
-                    (expire []
-                      (let [ts (System/currentTimeMillis)]
-                        (swap! counts (fn [entries]
-                                        (filter #(expire-entry % ts period)
-                                          entries)))
-                        nil))
-                    (getCount []
-                      (.expire this)
-                      (reduce + (map :value @counts)))
-                    (update [value]
-                      (let [ts (System/currentTimeMillis)]
-                        (swap! counts conj {:time ts :value value})
-                        nil)))]
-       (.register registry name spiral))))
+     (if (get (.getCounters registry) name)
+       (get (.getCounters registry) name)
+       (let [counts (atom [])
+             spiral (proxy [Counter ICounter IExpirer] []
+                      (expire []
+                        (let [ts (System/currentTimeMillis)]
+                          (swap! counts (fn [entries]
+                                          (filter #(expire-entry % ts period)
+                                            entries)))
+                          nil))
+                      (getCount []
+                        (.expire this)
+                        (reduce + (map :value @counts)))
+                      (update [value]
+                        (let [ts (System/currentTimeMillis)]
+                          (swap! counts conj {:time ts :value value})
+                          nil)))]
+         (.register registry name spiral)))))
